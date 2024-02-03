@@ -27,11 +27,10 @@ def feedsql():
     
     cwd = os.getcwd()
     filelist = os.listdir(os.path.join(cwd,'data'))
-    file = [i for i in filelist if '.csv' in i][0]
-    df = pd.read_csv(f'/opt/airflow/data/{file}')
+    file = [i for i in filelist if '.xlsx' in i][0]
+    df = pd.read_excel(f'/opt/airflow/data/{file}')
     # raise Exception(df)
     df.to_sql('dirty',conn,index=False,if_exists='replace')
-    sleep(3)
     
 def feedcsv():
     username = os.environ['POSTGRES_USER']
@@ -45,7 +44,6 @@ def feedcsv():
     
     df = pd.read_sql_query('select * from dirty',conn)
     df.to_csv('/opt/airflow/data/dirty.csv',sep=',', index=False)
-    sleep(3)
 
 def preprocessing():
     username = os.environ['POSTGRES_USER']
@@ -66,10 +64,18 @@ def preprocessing():
     df.drop_duplicates(inplace=True)
     df.fillna(0,inplace=True)
     
+    #Convert Columns to LowerCase
+    columns = [i.lower() for i in df.columns]
+    df.columns = columns
+    
+    #Convert to proper data type
+    df['invoicedate'] = pd.to_datetime(df['invoicedate'])
+    df['customerid'] = df['customerid'].astype(int).astype(str)
+    
+    
     # Save Cleaned Data
     df.to_csv('/opt/airflow/data/clean.csv',index=False,sep=',')
     df.to_sql('clean',conn,index=False,if_exists='replace')
-    sleep(3)
 
 def modeling():
     try:
@@ -83,8 +89,7 @@ def modeling():
         df.to_csv('/opt/airflow/data/clustered.csv',index=False)
         
     except Exception as e:
-        raise Exception(e)
-        
+        raise Exception(e)        
 
 
 default_args = {
