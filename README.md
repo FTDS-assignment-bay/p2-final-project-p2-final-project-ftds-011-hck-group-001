@@ -47,8 +47,8 @@ A combination of these three attributes can be defined to assign a quantitative 
 
 ### C. Approach Taken
 
-- Data Inspection
-- Exploratory Data Analysis (EDA)
 - Data Preparation
+- Exploratory Data Analysis (EDA)
+- Feature Engineering
 - Create RFM model
-- Implementing various clustering Models and validating
+- Implementing Clustering Models and Validating
