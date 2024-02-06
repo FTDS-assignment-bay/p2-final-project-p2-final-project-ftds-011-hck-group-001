@@ -3,7 +3,7 @@
 
 # Final Project
 
-This project aims to identify customer segments on a transnational data set for a UK-based online retail.
+This project was created to analyze RFM model-based and customer segmentation of UK-based and Registered Non-Store Online Retail.
 
 ## Introduction
 
