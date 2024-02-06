@@ -1,0 +1,17 @@
+
+Problems:
+airflow-init not running
+
+Solution:
+make sure to add this to env file
+AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://user:pass@postgres/database
+
+Why:
+The assumption is because that command are creating airflow user and give all needed access to airflow user, which is airflow-init neeeded to create and modify access on folder.
+
+Problems:
+airflow-webserver not running
+
+Solution:
+add command:webserver
+p
