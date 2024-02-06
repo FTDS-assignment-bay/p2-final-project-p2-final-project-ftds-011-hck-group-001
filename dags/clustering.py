@@ -4,6 +4,7 @@ import os
 import time
 import sys
 from datetime import datetime
+
 # Airflow
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
@@ -13,7 +14,11 @@ from airflow.utils.task_group import TaskGroup
 import joblib
 # sqlalchemy
 from sqlalchemy import create_engine
-from time import sleep
+
+#Import Pyspark and initialize spark
+# from pyspark.sql import SparkSession
+# from pyspark.sql.types import StringType,TimestampType 
+# spark = SparkSession.builder.app('dataframe').getOrCreate()
 
 def feedsql():
     username = os.environ['POSTGRES_USER']
@@ -62,15 +67,24 @@ def preprocessing():
     df.replace('.','0',inplace=True)
     df.replace('-','0',inplace=True)
     df.drop_duplicates(inplace=True)
-    df.fillna(0,inplace=True)
+    df.dropna(inplace=True)
     
-    #Convert Columns to LowerCase
-    columns = [i.lower() for i in df.columns]
-    df.columns = columns
+    # Drop value less than 0
+    dropped = df.select_dtypes(include='int')
+    st = ''
+    for i in dropped.columns:
+        st+=f' {i} < 0 or'
+    st = st[:-2]
+    drop_index = dropped.query(st).index
+    df.drop(index=drop_index, inplace=True)
+    
+    #Convert To Int
+    df[df.columns[0]].replace(to_replace=r'[A-Za-z]',value='',regex=True,inplace=True)
+    df[df.columns[0]] = df[df.columns[0]].astype(int)
     
     #Convert to proper data type
-    df['invoicedate'] = pd.to_datetime(df['invoicedate'])
-    df['customerid'] = df['customerid'].astype(int).astype(str)
+    df[df.columns[4]] = pd.to_datetime(df[df.columns[4]])
+    df[df.columns[6]] = df[df.columns[6]].astype(int).astype(str)
     
     
     # Save Cleaned Data
