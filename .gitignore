@@ -3,7 +3,6 @@ logs/
 frontend/
 backend/
 commitbot.py
-data/*.csv
 
 # Dependency directories
 node_modules/
