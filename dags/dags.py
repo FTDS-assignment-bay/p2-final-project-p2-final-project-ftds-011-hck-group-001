@@ -22,6 +22,31 @@ from sqlalchemy import create_engine
 # from pyspark.sql.types import StringType,TimestampType 
 # spark = SparkSession.builder.app('dataframe').getOrCreate()
 
+# RClass untuk Recency
+
+def RClass(x,p,d):
+    if x <= d[p][0.25]:
+        return 1
+    elif x <= d[p][0.50]:
+        return 2
+    elif x <= d[p][0.75]:
+        return 3
+    else:
+        return 4
+
+## FMClass untuk Frequency dan Monetary value
+
+def FMClass(x,p,d):
+    if x <= d[p][0.25]:
+        return 4
+    elif x <= d[p][0.50]:
+        return 3
+    elif x <= d[p][0.75]:
+        return 2
+    else:
+        return 1
+
+
 def feedsql():
     username = os.environ['POSTGRES_USER']
     password = os.environ['POSTGRES_PASSWORD']
@@ -101,10 +126,25 @@ def modeling():
         
         df1 = pd.read_csv('/opt/airflow/data/rfm.csv')
         df1['cluster'] = model.predict(df1)
+        quartiles = df1.quantile(q=[0.25,0.50,0.75])
+        # mengelompokkan pelanggan ke dalam kuartil berdasarkan Recency, Frequency, dan Monetary
+        rfmSeg = df1.copy()
+        rfmSeg['R_Quartile'] = rfmSeg['recency'].apply(RClass, args=('recency',quartiles,))
+        rfmSeg['F_Quartile'] = rfmSeg['frequency'].apply(FMClass, args=('frequency',quartiles,))
+        rfmSeg['M_Quartile'] = rfmSeg['monetary_value'].apply(FMClass, args=('monetary_value',quartiles,))
+        
+        # Menggabungkan nilai kuartil dari Recency, Frequency, dan Monetary
+        rfmSeg['RFMClass'] = rfmSeg.R_Quartile.map(str) \
+                                    + rfmSeg.F_Quartile.map(str) \
+                                    + rfmSeg.M_Quartile.map(str)
+        
         df2 = pd.read_csv('/opt/airflow/data/clean.csv')
         df = pd.merge(df1,df2,on='CustomerID')
         
         df.to_csv('/opt/airflow/backend/data/rfm_cluster.csv',index=False)
+        
+        df1 = rfmSeg
+        df = pd.merge(df1,df2,on='CustomerID')
         df.to_csv('/opt/airflow/data/rfm_cluster.csv',index=False)
         
     except Exception as e:
