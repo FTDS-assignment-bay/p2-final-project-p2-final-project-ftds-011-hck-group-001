@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import time
 import sys
-from datetime import datetime
+from datetime import datetime 
 
 
 
@@ -97,17 +97,35 @@ def modeling():
     try:
         get_model = os.listdir(os.path.join(os.getcwd(),'models'))
         name_model = [i for i in get_model if 'pkl' in i][0]
-        model = joblib.load(f'/opt/airflow/models/{get_model}')
+        model = joblib.load(f'/opt/airflow/models/{name_model}')
         
-        df = pd.read_csv('/opt/airflow/data/clean.csv')
-        df['cluster'] = model.predict(df)
+        df1 = pd.read_csv('/opt/airflow/data/rfm.csv')
+        df1['cluster'] = model.predict(df1)
+        df2 = pd.read_csv('/opt/airflow/data/clean.csv')
+        df = pd.merge(df1,df2,on='CustomerID')
         
-        df.to_csv('/opt/airflow/data/clustered.csv',index=False)
+        df.to_csv('/opt/airflow/backend/data/rfm_cluster.csv',index=False)
+        df.to_csv('/opt/airflow/data/rfm_cluster.csv',index=False)
         
     except Exception as e:
         raise Exception(e)
-        
 
+def creating_rfm():
+    df = pd.read_csv('/opt/airflow/data/clean.csv')
+    df['TotalPrice'] = df['UnitPrice']*df['Quantity']
+    df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+    print(df.columns)
+    now = datetime(2011,12,10)
+    rfmTable = df.groupby('CustomerID').agg({'InvoiceDate': lambda x: (now - x.max()).days, # Recency
+                                        'CustomerID': lambda x: len(x), # Frequency
+                                        'TotalPrice': lambda x: x.sum()}) # Monetary Value
+    rfmTable.rename(columns={'InvoiceDate': 'recency',
+                            'CustomerID': 'frequency',
+                            'TotalPrice': 'monetary_value'}, inplace=True)
+    
+    
+    print(rfmTable.columns)
+    rfmTable.to_csv('/opt/airflow/data/rfm.csv')       
 
 default_args = {
     'owner': 'adam',
@@ -116,7 +134,7 @@ default_args = {
 
 with DAG('cleaner',
          description='Data Processing',
-         schedule_interval='30 6 * * *',
+         schedule_interval='0 0 1 * *',
          default_args=default_args,
          catchup=False) as dag:
     # Pass data to sql
@@ -134,8 +152,19 @@ with DAG('cleaner',
         task_id='cleaning',
         python_callable=preprocessing
     )
+    # RFM
+    rfm = PythonOperator(
+        task_id='rfm',
+        python_callable=creating_rfm
+    )
     
-    tosql >> tocsv >> cleaning
+    # Clustering
+    cluster = PythonOperator(
+        task_id='segmentation',
+        python_callable=modeling
+    )
+    
+    tosql >> tocsv >> cleaning >> rfm >> cluster
     
 
 # with DAG('data_clustering',

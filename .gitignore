@@ -3,3 +3,79 @@ logs/
 frontend/
 backend/
 commitbot.py
+data/*.csv
+
+# Dependency directories
+node_modules/
+
+# Environment file
+.env
+
+# Next.js build output directory
+.next/
+
+# IDE files
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Cached files
+.cache/
+out/
+dist/
+.nuxt/
+.build/
+
+# npm package locks
+package-lock.json
+yarn.lock
+
+# Image directory if using static assets
+public/static/
+
+
+# Dependency directories
+venv/
+env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local development settings
+*.sqlite3
+db.sqlite3
+local_settings.py
+
+# Logs
+*.log
+
+# Compiled Python files
+*.pyc
+
+# Caches
+__pycache__/
+.cache/
+
+# Environment file
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Compiled translation files
+*.mo
+*.pot
+
+# Python bytecode cache
+__pycache__/
+
+# Testing environment
+.pytest_cache/
+
+# Migrations
+*/migrations/

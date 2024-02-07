@@ -10,6 +10,7 @@ x-setup: &setup
     - ./logs:/opt/airflow/logs
     - ./data:/opt/airflow/data
     - ./models:/opt/airflow/models
+    - ./deployment/backend/warehouse/data:/opt/airflow/backend/data
     - /var/run/docker.sock:/var/run/docker.sock
 
 x-depends-on: &depends-on
@@ -30,7 +31,7 @@ services:
       interval: 5s
       retries: 5
     volumes:
-      - ./dataset.csv:/data/dataset.csv
+      - ./dataset.xlsx:/data/dataset.xlsx
     env_file:
       - .env
 
