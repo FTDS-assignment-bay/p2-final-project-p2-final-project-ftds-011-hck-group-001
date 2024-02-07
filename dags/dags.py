@@ -5,8 +5,6 @@ import time
 import sys
 from datetime import datetime 
 
-
-
 # Airflow
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
