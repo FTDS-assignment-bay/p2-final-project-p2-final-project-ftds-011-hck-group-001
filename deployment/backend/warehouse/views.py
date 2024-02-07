@@ -21,7 +21,7 @@ def get_data(request):
     # df_dictlist = [json.loads(i) for i in test]
     # df_json = json.dumps(df_dictlist)
     
-    df = pd.read_csv(path).head()
+    df = pd.read_csv('https://raw.githubusercontent.com/FTDS-assignment-bay/p2-final-project-p2-final-project-ftds-011-hck-group-001/main/data/backend.csv').head()
     df_json = df.to_json(orient='split')
 
     return JsonResponse(df_json,safe=False,content_type='application/json')
@@ -36,7 +36,7 @@ def get_one_data(request):
     print(f"columns:{columns}, value:{value}")
     
     path = os.path.join(os.getcwd(),'warehouse','data','rfm_cluster.csv')
-    df = pd.read_csv(path)
+    df = pd.read_csv('https://raw.githubusercontent.com/FTDS-assignment-bay/p2-final-project-p2-final-project-ftds-011-hck-group-001/main/data/backend.csv')
     df = df.query(f'{columns} == {value}').sort_values(by=['monetary_value','frequency']).reset_index(drop=True).iloc[0:10]
     print(df.head())
     df_json = df.to_json(orient='split')
