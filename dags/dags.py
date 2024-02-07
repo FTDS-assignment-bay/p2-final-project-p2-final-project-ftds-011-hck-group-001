@@ -172,7 +172,7 @@ default_args = {
     'start_date': datetime(2022, 12, 24, 12, 00)
 }
 
-with DAG('cleaner',
+with DAG('Data Pipeline',
          description='Data Processing',
          schedule_interval='0 0 1 * *',
          default_args=default_args,
