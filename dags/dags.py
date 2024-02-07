@@ -139,7 +139,7 @@ def modeling():
         df2 = pd.read_csv('/opt/airflow/data/clean.csv')
         df = pd.merge(df1,df2,on='CustomerID')
         
-        df.to_csv('/opt/airflow/backend/data/rfm_cluster.csv',index=False)
+        df.to_csv('/opt/airflow/data/backend.csv',index=False)
         
         df1 = rfmSeg
         df = pd.merge(df1,df2,on='CustomerID')
@@ -170,7 +170,7 @@ default_args = {
     'start_date': datetime(2022, 12, 24, 12, 00)
 }
 
-with DAG('Data Pipeline',
+with DAG('data_pipeline',
          description='Data Processing',
          schedule_interval='0 0 1 * *',
          default_args=default_args,
